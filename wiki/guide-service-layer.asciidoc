@@ -1,0 +1,265 @@
+:toc:
+toc::[]
+
+= Service Layer
+
+The service layer is responsible to expose functionality of the link:guide-logic-layer[logical layer] to external consumers over a network. It is responsible for the following aspects:
+
+* link:guide-dataaccess-layer[transaction control]
+* link:guide-security#authorization[authorization]
+* transformation of functionality to xref:protocol[technical protocols]
+
+== Types of Services
+If you want to create a service please distinguish the following types of services:
+
+* *External Services* +
+are used for communication between different companies, vendors, or partners.
+* *Internal Services* +
+are used for communication between different applications in the same application landscape of the same vendor.
+** *Back-end Services* +
+are internal services between Java back-ends typically with different release and deployment cycles (otherwise if not Java consider this as external service).
+** *JS-Client Services* +
+are internal services provided by the Java back-end for JavaScript clients (GUI).
+** *Java-Client Services* +
+are internal services provided by the Java back-end for for a native Java client (JavaFx, EclipseRcp, etc.).
+
+The choices for technology and protocols will depend on the type of service. Therefore the following table gives a guideline for aspects according to the service types. These aspects are described below.
+
+.Aspects according to service-type
+[options="header"]
+|=======================
+|*Aspect*                     |*External Service*|*Back-end Service*|*JS-Client Service*|*Java-Client Service*
+|xref:versioning[*versioning*]|required          |required          |not required       |not required
+|xref:interoperability[*interoperability*]|mandatory         |not required      |implicit           |not required
+|xref:protocol[recommended *protocol*]|xref:soap[SOAP] or xref:rest[REST]|xref:http-invoker[HTTP-Invoker]|xref:rest[REST]+JSON|xref:http-invoker[HTTP-Invoker]
+|=======================
+
+== Versioning
+For services consumed by other applications we use versioning to prevent incompatibilities between applications when deploying updates. This is done by the following conventions:
+
+* We define a two digit version number separated by underscore and prefixed with +v+ for version (e.g. +v1_0+).
+* We use the version number as part of the Java package defining the service API (e.g. +com.foo.application.component.service.api.v1_0+)
+* We use the version number as part of the service name in the remote URL (e.g. +https://application.foo.com/services/ws/component/v1_0/MyService+)
+* Whenever we need to change the API of a service we create a new version (e.g. +v1_1+) as an isolated copy of the previous version of the service. In the implementation of different versions of the same service we can place compatibility code and delegate to the same unversioned use-case of the logic layer whenever possible.
+* For maintenance and simplicity we avoid keeping more than one previous version.
+
+NOTE: (JH) Should we distinguish between major and minor version here (this is more implementation specific and can cause mystic discussions where linear versioning v1, v2, v3 would be more KISS)?
+
+== Interoperability
+For services that are consumed by clients with different technology _interoperability_ is required. This is addressed by selecting the right xref:protocol[protocol] following protocol-specific best practices and following our considerations especially _simplicity_.
+
+== Protocol
+For services there are different protocols. Those relevant for and recommended by OASP4J are listed in the following sections with examples how to implement them in Java.
+
+=== SOAP
+SOAP is a common protocol that is rather complex and heavy. It allows to build inter-operable and well specified services (see WSDL). SOAP is transport neutral what is not only an advantage. We strongly recommend to use HTTPS transport and ignore additional complex standards like WS-Security and use established HTTP-Standards such as RFC2617 (and RFC5280).
+
+==== JAX-WS
+For building web-services with Java we use the https://jcp.org/en/jsr/detail?id=224[JAX-WS] standard.
+There are two approaches:
+
+* code first
+* contract first
+
+Here is an example in case you define a code-first service.
+We define a regular interface to define the API of the service and annotate it with JAX-WS annotations:
+[source,java]
+--------
+@WebService
+public interface TablemanagmentWebService {
+
+  @WebMethod
+  @WebResult(name = "message")
+  TableEto getTable(@WebParam(name = "id") String id);
+
+}
+--------
+And here is a simple implementation of the service:
+[source,java]
+--------
+@Named("TablemanagementWebService")
+@WebService(endpointInterface = "io.oasp.gastronomy.restaurant.tablemanagement.service.api.ws.TablemanagmentWebService")
+public class TablemanagementWebServiceImpl implements TablemanagmentWebService {
+
+  private Tablemanagement tableManagement;
+
+  @Override
+  public TableEto getTable(String id) {
+
+    return this.tableManagement.findTable(id);
+  }
+--------
+Finally we have to register our service implementation in the spring configuration file +beans-service.xml+:
+[source,xml]
+--------
+  <jaxws:endpoint id="tableManagement" implementor="#TablemanagementWebService" address="/ws/Tablemanagement/v1_0"/>
+--------
+
+The +implementor+ attribute references an existing bean with the ID +TablemanagementWebService+ that corresponds to the +@Named+ annotation of our implementation (see link:guide-dependency-injection[dependency injection guide]). The +address+ attribute defines the URL path of the service.
+
+==== SOAP Custom Mapping
+In order to map custom link:guide-datatype[datatypes] or other types that do not follow the Java bean conventions, you need to write adapters for JAXB (see link:guide-xml[XML]).
+
+==== SOAP Testing
+For testing SOAP services in general consult the link:guide-testing[testing guide].
+
+For testing SOAP services manually we strongly recommend http://www.soapui.org/[SoapUI].
+
+=== REST
+REST is an inter-operable protocol that is more lightweight than SOAP.
+However, it is no real standard and can cause confusion. Therefore we define best practices here to guide you.
+For a general introduction consult the http://en.wikipedia.org/wiki/Representational_State_Transfer[wikipedia].
+REST services are called via HTTP(S) URIs. We distinguish between *collection* and *element* URIs:
+
+* A collection URI is build from the rest service URI by appending the name of a collection. This is typically the name of an entity. Such URI identifies the entire collection of all elements of this type. Example: https://mydomain.com/myapp/services/rest/mycomponent/myentity
+* An element URI is build from a collection URI by appending an element ID. It identifies a single element (entity) within the collection. Example: https://mydomain.com/myapp/services/rest/mycomponent/myentity/42
+
+The following table specifies how to use the HTTP methods (verbs) for collection and element URIs properly (see http://en.wikipedia.org/wiki/Representational_State_Transfer#Applied_to_web_services[wikipedia]). For general design considerations beyond this documentation see the https://pages.apigee.com/web-api-design-ebook.html[API Design eBook].
+
+.Usage of HTTP methods
+[options="header"]
+|=======================
+|*HTTP Method*|*Meaning (Element URI)*  |*Meaning (Collection URI)*
+|+GET+        |Read element             |Read all elements (typically using paging and hit limit to prevent loading too much data)
+|+PUT+        |Replace element          |Replace entire collection (typically not supported)
+|+POST+       |Not supported            |Create a new element in the collection
+|+DELETE+     |Delete element           |Delete entire collection (typically not supported)
+|=======================
+
+==== JAX-RS
+For implementing REST services we use the https://jax-rs-spec.java.net/[JAX-RS] standard. As an implementation we recommend http://cxf.apache.org/[CXF]. For link:guide-json[JSON] bindings we use http://wiki.fasterxml.com/JacksonHome[Jackson] while link:guide-xml[XML] binding works out-of-the-box with http://www.oracle.com/technetwork/articles/javase/index-140168.html[JAXB].
+To implement a service you simply write a regular class and use JAX-RS annotations to annotate methods that shall be exposed as REST operations. Here is a simple example:
+
+[source,java]
+--------
+@Path("/tablemanagement")
+@Named("TableManagementRestService")
+@Transactional
+public class TableManagementRestServiceImpl implements RestService {
+  // ...
+  @Produces(MediaType.APPLICATION_JSON)
+  @GET
+  @Path("/table/{id}/")
+  @RolesAllowed(PermissionConstant.GET_TABLES)
+  public TableBo getTable(@PathParam("id") String id) throws RestServiceException {
+
+    Long idAsLong;
+    if (id == null)
+      throw new BadRequestException("missing id");
+    try {
+      idAsLong = Long.parseLong(id);
+    } catch (NumberFormatException e) {
+      throw new RestServiceException("id is not a number");
+    } catch (NotFoundException e) {
+      throw new RestServiceException("table not found");
+    }
+    return this.tableManagement.getTable(idAsLong);
+  }
+  // ...
+}
+--------
+Here we can see a REST service for the link:architecture#business-architecture[business component] +tablemanagement+. The method +getTable+ can be accessed via HTTP GET (see +@GET+) under the URL path +tablemanagement/table/{id}+ (see +@Path+ annotations) where +{id}+ is the ID of the requested table and will be extracted from the URL and provided as parameter +id+ to the method +getTable+. It will return its result (+TableBo+) as link:guide-json[JSON] (see +@Produces+). As you can see it delegates to the link:guide-logic-layer[logic] component +tableManagement+ that contains the actual business logic while the service itself only contains mapping code and general input validation. Further you can see the +@Transactional+ annotation for link:guide-transactions[transaction handling] and +@RolesAllowed+ for link:guide-security[security]. The REST service implementation is a regular CDI bean that can use link:guide-dependency-injection[dependency injection].
+
+NOTE: With JAX-RS it is important to make sure that each service method is annotated with the proper HTTP method (+@GET+,+@POST+,etc.) to avoid unnecessary debugging. So you should take care not to forget to specify one of these annotations.
+
+===== JAX-RS Configuration
+All your services have to be declared in the +beans-service.xml+ file. For the example this would look as following:
+[source,xml]
+--------
+  <jaxrs:server id="CxfRestServices" address="/rest">
+    <!-- ... -->
+    <jaxrs:serviceBeans>
+      <ref bean="TableManagementRestService"/>
+      <!-- ... -->
+    </jaxrs:serviceBeans>
+  </jaxrs:server>
+--------
+Here +TableManagementRestService+ is the identifier used in the +@Named+ annotation of the REST service implementation (see example above).
+
+==== HTTP Status Codes
+Further we define how to use the HTTP status codes for REST services properly. In general the 4xx codes correspond to an error on the client side and the 5xx codes to an error on the server side.
+
+.Usage of HTTP status codes
+[options="header"]
+|=======================
+|*HTTP Code*  |*Meaning*   |*Response*       |*Comment*
+|200          |OK          |requested result |Result of successful GET
+|204          |No Content  |_none_           |Result of successful POST, DELETE, or PUT (void return)
+|400          |Bad Request |error details    |The HTTP request is invalid (parse error, validation failed)
+|401          |Unauthorized|_none_ (security)|Authentication failed
+|403          |Forbidden   |_none_ (security)|Authorization failed
+|404          |Not found   |_none_           |Either the service URL is wrong or the requested resource does not exist
+|500          |Server Error|error code, UUID |Internal server error occurred (used for all technical exceptions)
+|=======================
+
+For more details about REST service design please consult the http://restcookbook.com/[RESTful cookbook].
+
+==== REST Exception Handling
+For exceptions a service needs to have an exception facade that catches all exceptions and handles them by writing proper log messages and mapping them to a HTTP response with an according xref:http-status-codes[HTTP status code]. Therefore the OASP provides a generic solution via +RestServiceExceptionFacade+. You need to follow the link:guide-exceptions[exception guide] so that it works out of the box because the facade needs to be able to distinguish between business and technical exceptions.
+You need to configure it in your +beans-service.xml+ as following:
+
+[source,xml]
+--------
+  <jaxrs:server id="CxfRestServices" address="/rest">
+    <jaxrs:providers>
+      <bean class="io.oasp.module.rest.service.impl.RestServiceExceptionFacade"/>
+      <!-- ... -->
+    </jaxrs:providers>
+    <!-- ... -->
+  </jaxrs:server>
+--------
+Now your service may throw exceptions but the facade with automatically handle them for you.
+
+==== REST Media Types
+The payload of a REST service can be in any format as REST by itself does not specify this. The most established ones that the OASP recommends are link:guide-xml[XML] and link:guide-json[JSON]. Follow these links for further details and guidance how to use them properly. +JAX-RS+ and +CXF+ properly support these formats (+MediaType.APPLICATION_JSON+ and +MediaType.APPLICATION_XML+ can be specified for +@Produces+ or +@Consumes+). Try to decide for a single format for all services if possible and NEVER mix different formats in a service.
+
+In order to use link:guide-json[JSON via Jackson] with +CXF+ you need to register the factory in your +beans-service.xml+ and make +CXF+ use it as following:
+
+[source,xml]
+--------
+  <jaxrs:server id="CxfRestServices" address="/rest">
+    <jaxrs:providers>
+      <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
+        <property name="mapper">
+          <ref bean="ObjectMapperFactory"/>
+        </property>
+      </bean>
+      <!-- ... -->
+    </jaxrs:providers>
+    <!-- ... -->
+  </jaxrs:server>
+
+  <bean id="ObjectMapperFactory" factory-bean="RestaurantObjectMapperFactory" factory-method="createInstance"/>
+--------
+
+==== REST Testing
+For testing REST services in general consult the link:guide-testing[testing guide].
+
+For manual testing REST services there are browser plugins:
+
+* Firefox: https://addons.mozilla.org/en-US/firefox/addon/httprequester/[httprequester] (or https://addons.mozilla.org/en-US/firefox/addon/poster/[poster])
+* Chrome: http://www.getpostman.com/[postman] (https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo[advanced-rest-client])
+
+=== HTTP-Invoker
+http://docs.spring.io/spring-integration/docs/2.0.x/reference/html/httpinvoker.html[HTTP-Invoker] is a very simple and easy to use communication protocol that is part of spring remoting. It simply sends the serialized method call with all its arguments and sends the data via HTTP(S).
+
+== Service Considerations
+The term _service_ is quite generic and therefore easily misunderstood. It is a unit exposing coherent functionality via a well-defined interface over a network. For the design of a service we consider the following aspects:
+
+* *self-contained* +
+The entire API of the service shall be self-contained and have no dependencies on other parts of the application (other services, implementations, etc.).
+* *idem-potent* +
+E.g. creation of the same master-data entity has no effect (no error)
+* *loosely coupled* +
+Service consumers have minimum knowledge and dependencies on the service provider.
+* *normalized* +
+complete, no redundancy, minimal
+* *coarse-grained* +
+Service provides rather large operations (save entire entity or set of entities rather than individual attributes)
+* *atomic* +
+Process individual entities (for processing large sets of data use a link:guide-batch-layer[batch] instead of a service)
+* *simplicity* +
+avoid polymorphism, RPC methods with unique name per signature and no overloading, avoid attachments (consider separate download service), etc.
+
+== Security
+A common security threat is https://www.owasp.org/index.php/Top_10_2013-A8-Cross-Site_Request_Forgery_(CSRF)[CSRF] for REST services. Therefore all REST operations that are performing modifications (PUT, POST, DELETE, etc. - all except GET) have to be secured against CSRF attacks. In OASP4J we are using spring-security that already solves CSRF token generation and verification. The integration is part of the application template as well as the sample-application.

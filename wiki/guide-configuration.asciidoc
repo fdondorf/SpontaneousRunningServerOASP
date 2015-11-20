@@ -1,0 +1,95 @@
+:toc:
+
+toc::[]
+
+= Configuration
+
+For flexibility an application needs to be configurable. So far there is no general standard for configurations and how to structure and name configuration files. Therefore the OASP4J gives you detailed instructions and best-practices how to deal with configurations and manage them. This prevents chaos and leads to success in maintenance and operations.
+In general we distinguish the following kinds of configurations that are explained in the following sections:
+
+* xref:application-configuration[application configuration] maintained by developers
+* xref:environment-configuration[environment configuration] maintained by operators
+* xref:business-configuration[business configuration] maintained by business administrators
+
+== Application Configuration
+The application configuration contains all internal settings of the application (component implementations, integration, database mappings, etc.) and is maintained by the application developers.
+As we make intensive use of the spring framework this is especially about Spring XML configuration files. According to link:guide-dependency-injection[dependency-injection] we only use Spring XML to configure specific integrations and general setup. The application configuration resides in the folder +app+. 
+
+=== beans-application
+As you can see in our xref:configuration-files[configuration file layout] we use +beans-application.xml+ to bundle the configuration of the entire application. This file represents the root of the application configuration and imports all other configurations for different aspects (layers and technical components).
+
+=== beans-aspect
+Every aspects of an application configuration lies in an own folder, named after the aspect. The folder contains the configuration file +beans-aspect.xml+, which is is the root configuration file for this aspect. Every configuration +beans-aspect.xml+ can again be divided into additional configurations located in the same +aspect+ folder. 
+
+Example of an aspect structure:
+
+* +aspect+
+** +beans-aspect.xml+
+** ...
+
+For further explanation of the Spring XML configuration consult http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-factory-metadata[spring documentation].
+
+You can find a more comprehensive example of the structure of an application configuration at the xref:configuration-files[configuration file layout example].
+
+=== Logging configuration
+The main configuration file +logback.xml+ resides directly in +src/main/resources+ and is not located in the +app+ folder. The logging configuration is explained in detail in the link:guide-logging#configuration[logging guide]. 
+
+== Environment Configuration
+The environment configuration contains configuration parameters (port numbers, host names, passwords, logins, timeouts, certificates, etc.) specific for the different environments. These are under the control of the operators responsible for the application.
+As we suggest to only have one application per servlet-container (tomcat) the environment specific configuration is to be placed into +tomcat/lib/config/env/application.properties+ so it will be found by the classloader of the web-application (the deployed WAR file). In this +application.properties+ you only define the minimum properties that are environment specific and inherit everything else from the +application-default.properties+, which itself resides in the +app+ folder.
+
+=== application.properties
+The file +application.properties+ and +application-default.properties+ can define various properties. The common defaults for the application shall be defined in +application-default.properties+ that is bundled and deployed with the application. The +application.properties+ file itself must NOT declare all properties of the +application-default.properties+ again.
+
+These properties are explained in the corresponding configuration sections of the guides for each topic:
+
+* link:guide-dataaccess-layer#database-system-and-access[persistence configuration]
+* link:guide-service-layer#jax-rs-configuration[service configuration]
+
+== Business Configuration
+The business configuration contains all business configuration values of the application, which can be edited by administrators through the GUI. The business configuration values are stored in the database in key/value pairs.
+
+The database table +business_configuration+ has the following columns:
+
+* ID
+* Property name
+* Property type (Boolean, Integer, String)
+* Property value
+* Description
+
+According to the entries in this table, the GUI shows a generic form to change business configuration. The hierachy of the properties determines the place in the GUI, so the GUI bundles properties from the same hierarchy level and name. Boolean values are shown as checkboxes, integer and string values as text fields. The properties are read and saved in a typed form, an error is raised if you try to save a string in an integer property for example.
+
+We recommend the following base layout for the hierarchical business configuration:
+
++component.[subcomponent].[subcomponent].propertyname+
+
+== Configuration Files
+We read configurations from the java classpath to make things flexible and easy. In your application project you will find and add the configurations below the directory +src/main/resources/+.
+
+The OASP defines a generic layout for configurations on the classpath in the following form:
+
+* +src/main/resources+
+** +config/+
+*** +env+ (not delivered with application, only in * +src/test/resources/+)
+**** xref:application.properties[+application.properties+]
+**** ...
+*** +app+
+**** +common+
+***** +beans-common.xml+
+***** ...
+**** +logic+
+***** +beans-logic.xml+
+***** ...
+**** link:guide-dataaccess-layer#database-configuration[+persistence+]
+***** +beans-jpa.xml+
+***** +beans-persistence.xml+
+***** +NamedQueries.xml+
+***** ...
+**** +security+
+***** link:https://github.com/oasp/oasp4j/wiki/guide-security#access-control-schema[+access-control-schema.xml+]
+***** +beans-security.xml+
+***** ...
+**** +beans-application.xml+
+**** xref:application.properties[+application-default.properties+]
+**** ...
+** +logback.xml+

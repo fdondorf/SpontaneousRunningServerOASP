@@ -1,0 +1,12 @@
+*1. Download Git SCM for windows and create a client*
+
+* http://msysgit.github.io/ 
+* Click forward till "Adjusting your PATH environment" - select "Use Git from the Windows Command Prompts" + 
+
+image::https://github.com/schowalter0112/Prints-OASP4j-Tutorial/blob/master/Git%20hub%20client/Use%20Git%20from%20the%20Windows%20Command%20Prompts.jpg[git hub client]
+_Figure 1: Adjusting your PATH environment_ +
+ + 
+
+*2. Download TortoiseiGit - Interface to Git Version Control*
+
+* https://code.google.com/p/tortoisegit/

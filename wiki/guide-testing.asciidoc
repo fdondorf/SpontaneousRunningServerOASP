@@ -1,0 +1,57 @@
+:toc:
+toc::[]
+
+= Testing
+
+== General best practices
+For testing please follow our general best practices:
+
+* Tests should have a clear goal that should also be documented.
+* Tests have to be classified into different integration levels that are explained in the following section.
+* Tests should follow a clear naming convention.
+* Automated tests need to properly assert the result of the tested operation(s) in a reliable way. E.g. avoid stuff like +assertEquals(42, service.getAllEntities())+ or even worse tests that have no assertion at all (might still be reasonable to test that an entire configuration setup such as spring config of application is intact).
+* Tests need to be independent of each other. Never write test-cases or tests (in Java +@Test+ methods) that depend on another test to be executed before. 
+* In general tests should NOT have side-effects. Otherwise following tests may fail and it is very hard to trace down the actual reason of the error. If changing the state (e.g. database) is required for some advanced integration test (e.g. only real commit will trigger and test DB constraints) then it has to be ensured that the test-case performs a cleanup (e.g. in +@AfterClass+). A best practice for integration testing is to combine operations that are neutral in combination (e.g. create entity, read again by id, change and update entity, search entity by updated values, delete entity). However, you need to ensure that the transaction only gets committed if this entire combination succeeds.
+* Plan your tests and testdata management properly before implementing.
+* Instead of having a too strong focus on test coverage better ensure you have covered your critical core functionality properly and review the code including tests.
+* Test code shall NOT be seen as second class code. You shall consider design, architecture and code-style also for your test code but do not over-engineer it.
+* Test automation is good but should be considered in relation to cost per use. Creating full coverage via UI integration tests can cause a massive amount of test-code that can turn out as a huge maintenance hell. Always consider all aspects including product life-cycle, criticality of use-cases to test, and variability of the aspect to test (e.g. UI, test-data).
+* Use continuous integration and establish that the entire team wants to have clean builds and running tests.
+
+== Test Automation Technology Stack
+For test automation we use http://junit.org/[JUnit]. Further we are using according enhancements and addons such as http://hamcrest.org/JavaHamcrest/[harmcrest], http://docs.spring.io/spring/docs/current/spring-framework-reference/html/testing.html#integration-testing[spring-test] or http://mockito.org/[mockito].
+
+== Integration Levels
+There are many discussions about the right level of integration for test automation. Sometimes it is better to focus on small, isolated modules of the system - whatever a “module” may be. In other cases it makes more sense to test integrated groups of modules. Because there is no universal answer to this question, OASP only defines a common terminology for what could be tested. Each project must make its own decision, what and how to test automatically.
+
+The picture below shows a view on the https://github.com/oasp/oasp4j/wiki/architecture#technical-architecture[OASP reference architecture] that helps us to define four different integration levels, numbered from one to four. Each of these integration levels may be object of automated test. 
+The server side code consists of three layers and cross-cutting components. For testing purposes, it is also important, to distinguish between application code and 3rd party code. Application-code is all code that is created for the application. 3rd party code includes all external tools and frameworks, e.g. Hibernate and Spring (see also https://github.com/oasp/oasp4j/wiki/architecture#technical-architecture[“Technology stack”]). The layers and cross-cutting components usually contain both kinds of code.
+
+image::https://raw.githubusercontent.com/wiki/oasp/oasp4j/images/integration-levels.png[Integration Levels]
+
+The boxes in the picture contain parenthesized numbers. These numbers depict the lowest integration level, a box belongs to. Higher integration levels also contain all boxes of lower integration levels. When writing tests for a given integration level, the boxes around this integration level must be replaced by placeholders and drivers.
+
+External systems do not belong to any integration level. OASP does not recommend involving real external systems in test automation. This means, they have to be replaced by placeholders/drivers in all automated tests. An exception may be external systems that are fully under control of the own development team.
+The following chapters describe the four integration levels. Note that there also client-side  module-, component- and integration-tests. These are described in the https://github.com/oasp/oasp4js/wiki/guide-testing[OASP4JS-Wiki].
+
+=== Level 1: Module Test
+The goal of module test is to provide fast feedback to the developer. Consequently, module tests must not have any interaction with the client, the file system or the database.
+
+The focus of module test is on the logical layer. Data access layer and service layer are replaced by placeholders/drivers. An exception may be helper classes that are located in the data access or the service layer that do not interact with clients, file system and the database. If there is code within the crosscutting components that is worth to be tested, it also can be tested isolated within module test. 
+
+We recommend to have separate module tests for the pure application code without 3rd party code and module tests that integrate application and 3rd party code. The goal of the latter kind of module test is to prove, that the application code uses 3rd party code in the right way and that 3rd party tools and frameworks are configured correctly. For example, often Spring configuration is very complex, so it should be tested, if all objects are connected and initialized correctly. 
+
+=== Level 2: Component Test
+Component testing means to test the logical layer together with the data access layer of one or more business components. Interaction with filesystem and database is also allowed in this integration level, but still there must not be any interaction via Http.  To avoid HTTP-communication, drivers and placeholders for external systems have to be located within the same virtual machine the test runs in. The service layer also has to be replaced by drivers/placeholders.
+
+There also may be parts of the data access layer (e.g. DAOs) that are worth to be tested as isolated as possible. Because those tests need access to the database, we locate them in the component test instead of module test, even if this is a very isolated test of a small piece of code.
+If there are crosscutting components that interact with the database or filesystem, this interaction also may be tested within the component test.
+
+=== Level 3: Integration Test
+Integration test cases run against the HTTP interface of the application. This means that they simulate a client (UI, batch or service consumer). Service providers  are simulated by placeholder, but these placeholders must be located outside the own virtual machine and accessed via HTTP.
+
+=== Level 4: Automated System Test
+The goal of system tests is to test the system as a whole against its official interfaces: Its UI and batches. Only External systems are simulated by drivers/placeholders outside the own virtual machine. 
+
+== Test Coverage
+We are using tools (SonarQube/Jacoco) to measure the coverage of the tests. Please always keep in mind that the only reliable message of a code coverage of +X%+ is that +(100-X)%+ of the code is entirely untested. It does not say anything about the quality of the tests or the software though it often relates to it.

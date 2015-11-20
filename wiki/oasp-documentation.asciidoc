@@ -1,0 +1,8 @@
+:toc:
+toc::[]
+
+= OASP Documentation 
+
+We are using the github wiki feature to create and maintain the documentation of the OASP.
+Please consult the https://github.com/oasp/oasp-docgen/wiki#guidelines[DocGen manual] as we are using DocGen
+to generate the documentation starting from link:oasp4j[].

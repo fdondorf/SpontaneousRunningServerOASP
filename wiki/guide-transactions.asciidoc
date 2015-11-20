@@ -1,0 +1,17 @@
+= Transaction Handling
+
+Transactions are technically processed by the link:guide-dataaccess-layer[presentation layer]. However, the transaction control has to be performed in upper layers. To avoid dependencies on persistence layer and technical code in upper layers, we use link:guide-aop[AOP] to add transaction control via annotations as aspect.
+
+As we recommend using http://spring.io[spring], we use the +@Transactional+ annotation (for a JEE application server you would use +@TransactionAttribute+ instead). We use this annotation in the link:guide-service-layer[service layer] to annotate services that participate in transactions (what typically applies to all services).
+
+[source,java]
+@Transactional
+public class MyExampleServiceImpl {
+  public MyDataTo getData(MyCriteriaTo criteria) {
+    ...
+  }
+  ...
+}
+
+== Batches
+Transaction control for batches is a lot more complicated and is described in the link:guide-batch-layer[batch layer].

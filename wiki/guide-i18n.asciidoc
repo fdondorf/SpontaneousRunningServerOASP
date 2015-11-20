@@ -1,0 +1,5 @@
+= Internationalization
+
+Internationalization (I18N) is about writing code independent from locale-specific informations.
+For I18N of text messages we are suggesting 
+http://m-m-m.sourceforge.net/apidocs/net/sf/mmm/util/nls/api/package-summary.html#documentation[mmm native-language-support].

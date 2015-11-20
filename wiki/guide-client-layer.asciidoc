@@ -1,0 +1,23 @@
+= Client Layer
+
+There are various technical approaches to build GUI clients. The OASP proposes rich clients that connect to the server via data-oriented link:guide-service-layer[services] (e.g. using REST with JSON).
+In general we have to distinguish the following types of clients:
+
+* web clients
+* native desktop clients
+* (native) mobile clients
+
+== Web Clients
+Currently we focus on building web-clients. And so far we offer a Java Script based client provided by https://github.com/oasp/oasp4js[OASP4JS].
+
+== Native Desktop Clients
+Currently not addressed. There are plans about JavaFx for the future.
+
+== Mobile Clients
+Dependent on target mobile platform. Android may be addressed due to Java.
+
+To support all mobile platforms with moderate effort, we recommend to use http://cordova.apache.org/[Cordova] and http://ionicframework.com/[ionic].
+
+== Security
+Security is not only an aspect for the server-side but also for clients. Especially in web-clients security threads such as https://www.owasp.org/index.php/Top_10_2013-A3-Cross-Site_Scripting_(XSS)[XSS] and https://www.owasp.org/index.php/Top_10_2013-A8-Cross-Site_Request_Forgery_(CSRF)[CSRF] have to be addressed.
+Therefore you should use proper frameworks that systematically prevent such security pitfalls. It should be easy for developers to do things correct and hard to do things wrong. This is absolutely not the case with plain web-technology. Therefore you should follow the guidelines of https://github.com/oasp/oasp4js[OASP4JS] to prevent security problems.

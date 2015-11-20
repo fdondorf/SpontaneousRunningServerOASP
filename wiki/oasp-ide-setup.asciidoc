@@ -1,0 +1,83 @@
+=== IDE Setup
+
+TODO: This is just the internal draft, needs more explanation.
+
+We are using the link:../../oasp4j-ide[oasp4j-ide] for development. To get started follow these steps:
+
+. Get a Git client. For Windows use:
+* http://msysgit.github.io/ (install without explorer integration but with option +Use Git from the Windows Command Prompts+)
+* https://code.google.com/p/tortoisegit/
+* https://gitcredentialstore.codeplex.com/ (for safe storage of your credentials)
+. Download the latest +oasp4j-ide-software-\*.zip+ and +oasp4j-ide-scripts-*.zip+ from +\\de-file10\ClientPE\OASP\oasp4j-ide\Releases+ (externals shall consult https://github.com/oasp/oasp4j-ide/wiki[oasp4j-ide])
+. Choose a project location for your project (e.g. +C:\projects\oasp+, referred to with +$projectLoc+ in this setup guides following steps). Avoid long paths and white spaces to prevent trouble. Extract the downloaded ZIP files via +Extract Here+ (e.g. using http://www.7-zip.org/[7-Zip]). Do not use the Winodws internal ZIP folder feature to extract as this is not working properly due to long filenames.
+. Create a file named +$projectLoc\variables-customized.bat+ in your project location with the following contents: 
++
+[source,bash]
+-----
+set MAIN_BRANCH=main
+set SETTINGS_REL_PATH=oasp4j\settings
+-----
++
+. Clone the git repositories you need to work on into +$projectLoc\workspaces\main+. E.g. open +console.bat+:
++
+[source,bash]
+-----
+cd workspaces/main
+git clone https://github.com/oasp/oasp4j.git
+git clone https://github.com/oasp/oasp4js.git
+-----
++
+. Run the script +$projectLoc\update-all-workspaces.bat+.
+You should end up having a structure like this in +$projectLoc+
++
+* +conf+
+* +scripts+
+* +software+
+* +system+
+* +workspaces+
+** +main+
+*** +oasp4j+
+**** +settings+
+**** ...
+*** +oasp4js+
+**** +app+
+**** ...
+** +readme.txt+
+* +console.bat+
+* ...
+* +variables.bat+
+* +variables-customized.bat+
++
+. Run the new script +$projectLoc\eclipse-main.bat+ to start the Eclipse IDE.
+. *In Eclipse* select +File > Import... > Import existing Maven Project+ and then choose the cloned projects from your workspace.
+. In Eclipse +Servers+ view right click on +Tomcat+, select +Add and remove...+ and choose the +oasp4j-sample-server+ project. Then if you start tomcat, you can test the sample application  browsing to +http://localhost:8081/oasp4j-sample-server/security/login+ (see https://github.com/oasp/oasp4j/blob/develop/settings/eclipse/workspace/setup/Servers/Tomcat7-config/tomcat-users.xml[+tomcat-users.xml+] for login credentials). ATTENTION: By default the sample application redirects to +jsclient+ for the oasp4js sample client that is build later in a following step (see below). Until then you will get a 404 (not found) error after that redirect.
+. If you want to properly test the example you also need the client from the OASP4JS. Build +oasp4js+ as following: 
+.. Run +console.bat+ 
+.. Ensure you have a +git+ client on your path:
++
+[source,cmd]
+-----
+git --help
+-----
++
+If you get an error instead of the git help output, please redo step 1.
+.. Now call the following commands:
++
+[source,cmd]
+-----
+cd workspaces/main/oasp4js/
+npm install -g gulp
+npm install -g bower
+npm install
+cd java
+mvn install
+-----
++
+.. You can then extract the client from +oasp4js/java/target/oasp4js-sample-*-web.zip+ into +oaps4j-sample-server/src/main/webapp/jsclient+ (restart your tomcat and open http://localhost:8081/oasp4j-sample-server/) or for simpler development run both tomcat and a grunt-server as overlay via:
++
+[source,cmd]
+-----
+cd workspaces/main/oasp4js
+gulp serve
+-----
++

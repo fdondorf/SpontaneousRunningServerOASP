@@ -1,0 +1,6 @@
+= Batches
+
+TODO
+
+A Batch is realized as standalone application using JSR352 (recommended via spring-batch).
+TODO best practices, example

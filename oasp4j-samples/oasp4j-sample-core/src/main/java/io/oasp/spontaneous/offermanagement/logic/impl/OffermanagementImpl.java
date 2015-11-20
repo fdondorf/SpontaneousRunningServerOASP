@@ -1,0 +1,303 @@
+package io.oasp.spontaneous.offermanagement.logic.impl;
+
+import io.oasp.module.jpa.common.api.to.PaginatedListTo;
+import io.oasp.spontaneous.general.logic.api.to.BinaryObjectEto;
+import io.oasp.spontaneous.general.logic.base.AbstractComponentFacade;
+import io.oasp.spontaneous.offermanagement.logic.api.Offermanagement;
+import io.oasp.spontaneous.offermanagement.logic.api.to.DrinkEto;
+import io.oasp.spontaneous.offermanagement.logic.api.to.MealEto;
+import io.oasp.spontaneous.offermanagement.logic.api.to.OfferCto;
+import io.oasp.spontaneous.offermanagement.logic.api.to.OfferEto;
+import io.oasp.spontaneous.offermanagement.logic.api.to.OfferFilter;
+import io.oasp.spontaneous.offermanagement.logic.api.to.OfferSearchCriteriaTo;
+import io.oasp.spontaneous.offermanagement.logic.api.to.OfferSortBy;
+import io.oasp.spontaneous.offermanagement.logic.api.to.ProductEto;
+import io.oasp.spontaneous.offermanagement.logic.api.to.ProductFilter;
+import io.oasp.spontaneous.offermanagement.logic.api.to.ProductSearchCriteriaTo;
+import io.oasp.spontaneous.offermanagement.logic.api.to.ProductSortBy;
+import io.oasp.spontaneous.offermanagement.logic.api.to.SideDishEto;
+import io.oasp.spontaneous.offermanagement.logic.api.to.SpecialEto;
+import io.oasp.spontaneous.offermanagement.logic.api.to.SpecialSearchCriteriaTo;
+import io.oasp.spontaneous.offermanagement.logic.api.usecase.UcFindOffer;
+import io.oasp.spontaneous.offermanagement.logic.api.usecase.UcFindProduct;
+import io.oasp.spontaneous.offermanagement.logic.api.usecase.UcFindSpecial;
+import io.oasp.spontaneous.offermanagement.logic.api.usecase.UcManageOffer;
+import io.oasp.spontaneous.offermanagement.logic.api.usecase.UcManageProduct;
+import io.oasp.spontaneous.offermanagement.logic.api.usecase.UcManageSpecial;
+
+import java.sql.Blob;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Implementation class for {@link Offermanagement}.
+ *
+ * @author loverbec
+ */
+@Named
+public class OffermanagementImpl extends AbstractComponentFacade implements Offermanagement {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OffermanagementImpl.class);
+
+  private UcFindOffer ucFindOffer;
+
+  private UcManageOffer ucManageOffer;
+
+  private UcFindProduct ucFindProduct;
+
+  private UcManageProduct ucManageProduct;
+
+  private UcFindSpecial ucFindSpecial;
+
+  private UcManageSpecial ucManageSpecial;
+
+  /**
+   * The constructor.
+   */
+  public OffermanagementImpl() {
+
+    super();
+  }
+
+  @Override
+  public OfferEto findOffer(Long id) {
+
+    return this.ucFindOffer.findOffer(id);
+  }
+
+  @Override
+  public OfferCto findOfferCto(Long id) {
+
+    return this.ucFindOffer.findOfferCto(id);
+  }
+
+  @Override
+  public List<OfferEto> findAllOffers() {
+
+    return this.ucFindOffer.findAllOffers();
+  }
+
+  @Override
+  public PaginatedListTo<OfferEto> findOfferEtos(OfferSearchCriteriaTo criteria) {
+
+    return this.ucFindOffer.findOfferEtos(criteria);
+  }
+
+  @Override
+  public List<OfferEto> findOffersFiltered(OfferFilter offerFilterBo, OfferSortBy sortBy) {
+
+    return this.ucFindOffer.findOffersFiltered(offerFilterBo, sortBy);
+  }
+
+  @Override
+  public void deleteOffer(Long offerId) {
+
+    this.ucManageOffer.deleteOffer(offerId);
+  }
+
+  @Override
+  public OfferEto saveOffer(OfferEto offer) {
+
+    return this.ucManageOffer.saveOffer(offer);
+  }
+
+  @Override
+  public boolean isProductInUseByOffer(ProductEto product) {
+
+    return this.ucManageProduct.isProductInUseByOffer(product);
+  }
+
+  @Override
+  public ProductEto saveProduct(ProductEto product) {
+
+    return this.ucManageProduct.saveProduct(product);
+  }
+
+  @Override
+  public void deleteProduct(Long productId) {
+
+    this.ucManageProduct.deleteProduct(productId);
+  }
+
+  @Override
+  public void updateProductPicture(Long productId, Blob blob, BinaryObjectEto binaryObjectEto) {
+
+    this.ucManageProduct.updateProductPicture(productId, blob, binaryObjectEto);
+  }
+
+  @Override
+  public void deleteProductPicture(Long productId) {
+
+    this.ucManageProduct.deleteProductPicture(productId);
+  }
+
+  @Override
+  public ProductEto findProduct(Long id) {
+
+    return this.ucFindProduct.findProduct(id);
+  }
+
+  @Override
+  public ProductEto findProductByRevision(Long id, Number revision) {
+
+    return this.ucFindProduct.findProductByRevision(id, revision);
+  }
+
+  @Override
+  public MealEto findMeal(Long id) {
+
+    return this.ucFindProduct.findMeal(id);
+  }
+
+  @Override
+  public DrinkEto findDrink(Long id) {
+
+    return this.ucFindProduct.findDrink(id);
+  }
+
+  @Override
+  public SideDishEto findSideDish(Long id) {
+
+    return this.ucFindProduct.findSideDish(id);
+  }
+
+  @Override
+  public List<ProductEto> findAllProducts() {
+
+    return this.ucFindProduct.findAllProducts();
+  }
+
+  @Override
+  public List<MealEto> findAllMeals() {
+
+    return this.ucFindProduct.findAllMeals();
+  }
+
+  @Override
+  public List<DrinkEto> findAllDrinks() {
+
+    return this.ucFindProduct.findAllDrinks();
+  }
+
+  @Override
+  public List<SideDishEto> findAllSideDishes() {
+
+    return this.ucFindProduct.findAllSideDishes();
+  }
+
+  @Override
+  public List<ProductEto> findProductsFiltered(ProductFilter productFilterBo, ProductSortBy sortBy) {
+
+    return this.ucFindProduct.findProductsFiltered(productFilterBo, sortBy);
+  }
+
+  @Override
+  public BinaryObjectEto findProductPicture(Long productId) {
+
+    return this.ucFindProduct.findProductPicture(productId);
+  }
+
+  @Override
+  public PaginatedListTo<ProductEto> findProductEtos(ProductSearchCriteriaTo criteria) {
+
+    return this.ucFindProduct.findProductEtos(criteria);
+  }
+
+  @Override
+  public Blob findProductPictureBlob(Long productId) {
+
+    return this.ucFindProduct.findProductPictureBlob(productId);
+  }
+
+  /**
+   * Sets the field 'ucFindOffer'.
+   *
+   * @param ucFindOffer New value for ucFindOffer
+   */
+  @Inject
+  public void setUcFindOffer(UcFindOffer ucFindOffer) {
+
+    this.ucFindOffer = ucFindOffer;
+  }
+
+  /**
+   * Sets the field 'ucManageOffer'.
+   *
+   * @param ucManageOffer New value for ucManageOffer
+   */
+  @Inject
+  public void setUcManageOffer(UcManageOffer ucManageOffer) {
+
+    this.ucManageOffer = ucManageOffer;
+  }
+
+  /**
+   * @param ucFindProduct new value of {@link #getucFindProduct}.
+   */
+  @Inject
+  public void setUcFindProduct(UcFindProduct ucFindProduct) {
+
+    this.ucFindProduct = ucFindProduct;
+  }
+
+  /**
+   * @param ucManageProduct new value of {@link #getucManageProduct}.
+   */
+  @Inject
+  public void setUcManageProduct(UcManageProduct ucManageProduct) {
+
+    this.ucManageProduct = ucManageProduct;
+  }
+
+  @Override
+  public SpecialEto findSpecial(Long id) {
+
+    return this.ucFindSpecial.findSpecial(id);
+  }
+
+  @Override
+  public PaginatedListTo<SpecialEto> findSpecialEtos(SpecialSearchCriteriaTo criteria) {
+
+    return this.ucFindSpecial.findSpecialEtos(criteria);
+  }
+
+  @Override
+  public SpecialEto saveSpecial(SpecialEto special) {
+
+    return this.ucManageSpecial.saveSpecial(special);
+  }
+
+  @Override
+  public boolean deleteSpecial(Long id) {
+
+    return this.ucManageSpecial.deleteSpecial(id);
+  }
+
+  /**
+   * Sets the field 'ucFindSpecial'.
+   *
+   * @param ucFindSpecial New value for ucFindSpecial
+   */
+  @Inject
+  public void setUcFindSpecial(UcFindSpecial ucFindSpecial) {
+
+    this.ucFindSpecial = ucFindSpecial;
+  }
+
+  /**
+   * Sets the field 'ucManageSpecial'.
+   *
+   * @param ucManageSpecial New value for ucManageSpecial
+   */
+  @Inject
+  public void setUcManageSpecial(UcManageSpecial ucManageSpecial) {
+
+    this.ucManageSpecial = ucManageSpecial;
+  }
+
+}

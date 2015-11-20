@@ -1,0 +1,18 @@
+= Open Application Standard Platform for Java (OASP4J)
+
+Welcome to the Java edition of OASP. For the documentation of OASP4J see the side-bar of this wiki.
+For developers and contributors please read link:oasp-ide-setup[IDE setup] and link:oasp-code[code guideline] to get started.
+
+== Wikis for OASP4J Documentation
+There are two places for this wiki:
+
+* https://github.com/oasp/oasp4j/wiki[oasp4j] for stable states of this wiki that is read-only for regular users.
+* https://github.com/oasp-forge/oasp4j-wiki/wiki[oasp4j-wiki] for development and contributions to this wiki. Here you can edit and contribute.
+
+== Contribution to OASP4J Documentation
+Contributions and improvements to the documentation are welcome. However, you should be aware of the following aspects:
+
+* Your contributions will become part of the OASP4J documentation and is licensed under creative commons (see footer).
+* If you want to contribute larger changes (beyond fixing a typo or a link please) consider to get in contact with the community (by creating an https://github.com/oasp/oasp4j/issue[issue]) before getting started. You do not want to write complete chapters and then get your work rejected afterwards.
+* Please consult the https://github.com/oasp/oasp-docgen/wiki#guidelines[DocGen manual] as we are using DocGen
+to generate the documentation starting from link:oasp4j[].

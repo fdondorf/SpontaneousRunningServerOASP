@@ -1,0 +1,76 @@
+:toc:
+toc::[]
+
+= Dependency Injection
+Dependency injection is one of the most important design patterns and is a key principle to a modular and component based architecture. The Java Standard for dependency injection is http://docs.oracle.com/javaee/6/api/javax/inject/package-summary.html[javax.inject (JSR330)] that we use in combination with http://docs.oracle.com/javaee/5/api/javax/annotation/package-summary.html[JSR250]. 
+
+There are many frameworks which support this standard including all recent JEE application servers. We recommend to use http://spring.io/[Spring] (a.k.a. springframework) that we use in our example application. However, the modules we provide typically just rely on JSR330 and can be used with any compliant container.
+
+== Example Bean
+Here you can see the implementation of an example bean using JSR330 and JSR250:
+[source, java]
+@Named
+public class MyBeanImpl implements MyBean {
+  private MyOtherBean myOtherBean;
+  @Inject
+  public void setMyOtherBean(MyOtherBean myOtherBean) {
+    this.myOtherBean = myOtherBean;
+  }
+  @PostConstruct
+  public void init() {
+    // initialization if required (otherwise omit this method)
+  }
+  @PreDestroy
+  public void dispose() {
+    // shutdown bean, free resources if required (otherwise omit this method)
+  }
+}
+
+It depends on +MyOtherBean+ that should be the interface of an other component that is injected into the setter because of the +@Inject+ annotation. To make this work there must be exactly one implementation of +MyOtherBean+ in the container (in our case spring). In order to put a Bean into the container we use the +@Named+ annotation so in our example we put +MyBeanImpl+ into the container. Therefore it can be injected into all setters that take the interface +MyBean+ as argument and are annotated with +@Inject+. To make spring find all your beans annotated with +@Named+ in the package +com.mypackage.example+ and its sub-packages you use the following element in your spring XML configuration:
+[source,XML]
+<context:component-scan base-package="com.mypackage.example"/>
+
+In some situations you may have an Interface that defines a kind of "plugin" where you can have multiple implementations in your container and want to have all of them. Then you can request a list with all instances of that interface as in the following example:
+[source, java]
+  @Inject
+  public void setConverters(List<MyConverter> converters) {
+    this.converters = converters;
+  }
+
+== Spring Usage and Conventions
+http://spring.io/[Spring] is an awesome framework that we highly recommend. However it has a long history and therefore offers many different ways to archive the same goals while some of them might lead you on the wrong track. The OASP4J helps you to do things right and defines conventions that give your development teams orientation.
+
+=== Spring XML Files
+Besides JSR330 it is sometimes necessary to use spring XML files in order to configure specific aspects. These files should be named +beans-\*.xml+ and located under +src/main/resources/config/app/+ (see link:guide-configuration[configuration guide]). If they are for test purposes they should be named +beans-test-*.xml+ and located under +src/test/resources/config/app/+.
+This helps you to find files easier and faster during development in your IDE.
+Additionally, we defined a recommendation how to structure the spring XML configurations of your application as you can see in our sample application.
+
+* +src/main/resources/config/app/+
+** +beans-application.xml+
+** +common/+
+*** +beans-common.xml+
+*** ...
+** +logic/+
+*** +beans-logic.xml+
+*** ...
+** +persistence/+
+*** +beans-persistence.xml+
+*** +beans-jpa.xml+
+*** ...
+** +service/+
+*** +beans-service.xml+
+*** ...
+
+== Key Principles
+A Bean in CDI (Context and Dependency-Injection) or Spring is typically part of a larger component and encapsulates some piece of logic that should in general be replaceable. As an example we can think of a Use-Case, Data-Access-Object (DAO), etc. As best practice we use the following principles:
+
+* *Separation of API and implementation* +
+We create a self-contained API documented with JavaDoc. Then we create an implementation of this API that we annotate with +@Named+. This implementation is treated as secret. Code from other components that wants to use the implementation shall only rely on the API. Therefore we use dependency injection via the interface with the +@Inject+ annotation.
+* *Stateless implementation* +
+By default implementations (CDI-Beans) shall always be stateless. If you store state information in member variables you can easily run into concurrency problems and nasty bugs. This is easy to avoid by using local variables and separate state classes for complex state-information. Try to avoid stateful CDI-Beans wherever possible. Only add state if you are fully aware of what you are doing and properly document this as a warning in your JavaDoc.
+* *Usage of JSR330* +
+We use javax.inject (JSR330) and JSR250 as a common standard that makes our code portable (works in any modern JEE environemnt). However, we recommend to use the springframework as container. But we never use proprietary annotations such as +@Autowired+ or +@Required+.
+* *Setter Injection* +
+For productive code (+src/main/java+) we use setter injection. Compared to private field injection this allows better testability and setting breakpoints for debugging. Compared to constructor injection it is better for maintenance. In link:guide-testing[spring integration tests] (+src/test/java+) private field injection is preferred for simplicity.
+* *KISS* +
+To follow the KISS (keep it small and simple) principle we avoid advanced features (e.g. link:guide-aop[AOP], non-singleton beans) and only use them where necessary.
