@@ -1,5 +1,17 @@
-/oasp4j-ide
-/settings
-/.editorconfig
-/.travis.yml
-/oasp4j-templates
+*.class
+*.classpath
+*.project
+*.iml
+.*
+target/
+eclipse-target/
+**/src/generated/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+oasp4j-samples/oasp4j-sample-server/src/main/webapp/jsclient/
