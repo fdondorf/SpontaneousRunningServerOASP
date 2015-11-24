@@ -23,3 +23,6 @@ oasp4j-samples/oasp4j-sample-server/src/main/webapp/jsclient/
 /oasp4j-samples/oasp4j-sample-server/.settings
 /oasp4j-samples/oasp4j-sample-server/*.classpath
 /oasp4j-samples/oasp4j-sample-server/*.project
+/oasp4j-samples/oasp4j-sample-server-integration/.settings
+/oasp4j-samples/oasp4j-sample-server-integration/*.classpath
+/oasp4j-samples/oasp4j-sample-server-integration/*.project
