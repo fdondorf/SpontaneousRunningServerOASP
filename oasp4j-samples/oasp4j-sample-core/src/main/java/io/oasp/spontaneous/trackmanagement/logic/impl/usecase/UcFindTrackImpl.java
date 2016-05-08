@@ -8,6 +8,9 @@ import io.oasp.spontaneous.trackmanagement.logic.api.to.TrackSearchCriteriaTo;
 import io.oasp.spontaneous.trackmanagement.logic.api.usecase.UcFindTrack;
 import io.oasp.spontaneous.trackmanagement.logic.base.usecase.AbstractTrackUc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Named;
 
 import org.slf4j.Logger;
@@ -31,7 +34,12 @@ public class UcFindTrackImpl extends AbstractTrackUc implements UcFindTrack {
   public TrackEto findTrack(Long id) {
 
     LOG.debug("Get Track with id {} from database.", id);
-    return getBeanMapper().map(getTrackDao().findOne(id), TrackEto.class);
+    TrackEto trackEto = new TrackEto();
+    TrackEntity track = getTrackDao().findOne(id);
+    trackEto = getBeanMapper().map(track, TrackEto.class);
+    trackEto.setUserId(track.getUser().getId());
+
+    return trackEto;
   }
 
   @Override
@@ -39,7 +47,20 @@ public class UcFindTrackImpl extends AbstractTrackUc implements UcFindTrack {
 
     criteria.limitMaximumPageSize(MAXIMUM_HIT_LIMIT);
     PaginatedListTo<TrackEntity> tracks = getTrackDao().findTracks(criteria);
-    return mapPaginatedEntityList(tracks, TrackEto.class);
+    PaginatedListTo<TrackEto> result = mapPaginatedEntityList(tracks);
+    return result;
   }
 
+  private PaginatedListTo<TrackEto> mapPaginatedEntityList(PaginatedListTo<TrackEntity> paginatedList) {
+
+    List<TrackEto> etoList = new ArrayList<>();
+    TrackEto eto;
+    for (TrackEntity entity : paginatedList.getResult()) {
+      eto = getBeanMapper().map(entity, TrackEto.class);
+      eto.setUserId(entity.getUser().getId());
+      etoList.add(eto);
+    }
+    PaginatedListTo<TrackEto> result = new PaginatedListTo<>(etoList, paginatedList.getPagination());
+    return result;
+  }
 }

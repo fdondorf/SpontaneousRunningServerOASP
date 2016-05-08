@@ -45,7 +45,8 @@ public class TrackmanagementImpl extends AbstractComponentFacade implements Trac
   @Override
   public TrackEto saveTrack(TrackEto track) {
 
-    return this.ucManageTrack.saveTrack(track);
+    TrackEto trackEto = this.ucManageTrack.saveTrack(track);
+    return trackEto;
   }
 
   @Override

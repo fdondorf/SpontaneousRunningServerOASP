@@ -36,6 +36,17 @@
                    SessionManagementFilter,
                    RestExceptionTranslationFilter,
                    FilterSecurityInterceptor"/>
+        <security:filter-chain pattern="/services/rest/loginSocial"
+            filters="RequestContextFilter,
+                   SecurityContextPersistenceFilter,
+                   RestLogoutFilter,
+                   JsonUsernamePasswordAuthenticationFilter,
+                   RequestCacheAwareFilter,
+                   SecurityContextHolderAwareRequestFilter,
+                   AnonymousAuthenticationFilter,
+                   SessionManagementFilter,
+                   RestExceptionTranslationFilter,
+                   FilterSecuritySocialInterceptor"/>
         <!-- REST Services intended for JS Client are secured based on a session cookies and have REST login/logout API -->
         <security:filter-chain pattern="/services/rest/**"
           filters="RequestContextFilter,
@@ -75,6 +86,20 @@
         <security:intercept-url pattern="/security/login*" access="isAnonymous()"/>
         <security:intercept-url pattern="/j_spring_security_login*" access="isAnonymous()"/>
         <security:intercept-url pattern="/j_spring_security_logout*" access="isAnonymous()"/>
+        <security:intercept-url pattern="/services/rest/security/v1/currentuser/" access="isAnonymous() or isAuthenticated()"/>
+        <security:intercept-url pattern="/**" access="isAuthenticated()"/>
+      </security:filter-security-metadata-source>
+    </property>
+  </bean>
+
+  <bean id="FilterSecuritySocialInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+    <property name="authenticationManager" ref="AuthenticationManager"/>
+    <property name="accessDecisionManager" ref="FilterAccessDecisionManager"/>
+    <property name="securityMetadataSource">
+      <security:filter-security-metadata-source use-expressions="true">
+        <security:intercept-url pattern="/" access="isAnonymous()"/>
+        <security:intercept-url pattern="/index.jsp" access="isAnonymous()"/>
+        <security:intercept-url pattern="/security/rest/security/loginSocial*" access="isAnonymous()"/>
         <security:intercept-url pattern="/services/rest/security/v1/currentuser/" access="isAnonymous() or isAuthenticated()"/>
         <security:intercept-url pattern="/**" access="isAuthenticated()"/>
       </security:filter-security-metadata-source>

@@ -16,13 +16,21 @@ public class TrackEto extends AbstractEto implements Track {
 
   private Long totalDuration;
 
+  private Long creationTime;
+
+  private Long userId;
+
+  private Long averageSpeed;
+
+  private String trackData;
+
   /**
    * {@inheritDoc}
    */
   @Override
   public String getName() {
 
-    return name;
+    return this.name;
   }
 
   /**
@@ -35,12 +43,29 @@ public class TrackEto extends AbstractEto implements Track {
   }
 
   /**
+   * @return trackData
+   */
+
+  public String getTrackData() {
+
+    return this.trackData;
+  }
+
+  /**
+   * @param trackData new value of {@link #gettrackData}.
+   */
+  public void setTrackData(String trackData) {
+
+    this.trackData = trackData;
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
   public Long getTotalDistance() {
 
-    return totalDistance;
+    return this.totalDistance;
   }
 
   /**
@@ -58,7 +83,7 @@ public class TrackEto extends AbstractEto implements Track {
   @Override
   public Long getTotalDuration() {
 
-    return totalDuration;
+    return this.totalDuration;
   }
 
   /**
@@ -68,6 +93,54 @@ public class TrackEto extends AbstractEto implements Track {
   public void setTotalDuration(Long totalDuration) {
 
     this.totalDuration = totalDuration;
+  }
+
+  /**
+   * @return creationTime
+   */
+  public Long getCreationTime() {
+
+    return this.creationTime;
+  }
+
+  /**
+   * @param creationTime new value of {@link #getcreationTime}.
+   */
+  public void setCreationTime(Long creationTime) {
+
+    this.creationTime = creationTime;
+  }
+
+  /**
+   * @return userId
+   */
+  public Long getUserId() {
+
+    return this.userId;
+  }
+
+  /**
+   * @param userId new value of {@link #getuserId}.
+   */
+  public void setUserId(Long userId) {
+
+    this.userId = userId;
+  }
+
+  /**
+   * @return averageSpeed
+   */
+  public Long getAverageSpeed() {
+
+    return this.averageSpeed;
+  }
+
+  /**
+   * @param averageSpeed new value of {@link #getaverageSpeed}.
+   */
+  public void setAverageSpeed(Long averageSpeed) {
+
+    this.averageSpeed = averageSpeed;
   }
 
   @Override

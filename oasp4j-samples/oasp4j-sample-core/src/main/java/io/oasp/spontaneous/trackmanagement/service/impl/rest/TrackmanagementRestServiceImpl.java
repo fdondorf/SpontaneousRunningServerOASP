@@ -1,6 +1,7 @@
 package io.oasp.spontaneous.trackmanagement.service.impl.rest;
 
 import io.oasp.module.jpa.common.api.to.PaginatedListTo;
+import io.oasp.module.jpa.common.api.to.PaginationTo;
 import io.oasp.spontaneous.trackmanagement.logic.api.Trackmanagement;
 import io.oasp.spontaneous.trackmanagement.logic.api.to.TrackEto;
 import io.oasp.spontaneous.trackmanagement.logic.api.to.TrackSearchCriteriaTo;
@@ -79,7 +80,8 @@ public class TrackmanagementRestServiceImpl {
   @Path("/track/")
   public TrackEto saveTrack(TrackEto track) {
 
-    return this.trackManagement.saveTrack(track);
+    TrackEto trackEto = this.trackManagement.saveTrack(track);
+    return trackEto;
   }
 
   /**
@@ -114,6 +116,25 @@ public class TrackmanagementRestServiceImpl {
   @Path("/track/search")
   @POST
   public PaginatedListTo<TrackEto> findTracksByPost(TrackSearchCriteriaTo searchCriteriaTo) {
+
+    return this.trackManagement.findTrackEtos(searchCriteriaTo);
+  }
+
+  /**
+   * Delegates to {@link UcFindTrack#findTrackEtos}.
+   *
+   * @return the {@link PaginatedListTo list} of matching {@link TrackEto}s.
+   */
+  @Path("/tracks")
+  @GET
+  public PaginatedListTo<TrackEto> getAllTracks() {
+
+    TrackSearchCriteriaTo searchCriteriaTo = new TrackSearchCriteriaTo();
+    PaginationTo paginationTo = new PaginationTo();
+    paginationTo.setPage(1);
+    paginationTo.setSize(10);
+    paginationTo.setTotal(true);
+    searchCriteriaTo.setPagination(paginationTo);
 
     return this.trackManagement.findTrackEtos(searchCriteriaTo);
   }

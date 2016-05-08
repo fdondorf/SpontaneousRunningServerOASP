@@ -45,7 +45,8 @@ INSERT INTO STAFFMEMBER (id, login, role, firstname, lastname, modificationCount
 INSERT INTO STAFFMEMBER (id, login, role, firstname, lastname, modificationCounter) VALUES (1, 'cook', 0, 'Carl', 'Cook', 0);
 INSERT INTO STAFFMEMBER (id, login, role, firstname, lastname, modificationCounter) VALUES (2, 'waiter', 1, 'Willy', 'Waiter', 0);
 INSERT INTO STAFFMEMBER (id, login, role, firstname, lastname, modificationCounter) VALUES (3, 'barkeeper', 2, 'Bianca', 'Barkeeper', 0);
+INSERT INTO STAFFMEMBER (id, login, role, firstname, lastname, modificationCounter) VALUES (4, 'f.dondorf@googlemail.com', 3, 'Flo', 'Don', 0);
 
 INSERT INTO SPECIAL (id, modificationCounter, name, offer_id, startingDay, startingHour, endingDay, endingHour, specialPrice) VALUES (0, 1, 'Happy Hour', 1, 'MONDAY', 18, 'MONDAY', 21, 4.99);
 
-INSERT INTO TRACK (id, modificationCounter, name, totalDistance, totalDuration) VALUES (0, 1, 'Track 1', 8000, 45000000);
+INSERT INTO TRACK (id, modificationCounter, name, creationTime, totalDistance, totalDuration, averageSpeed, user_id) VALUES (0, 1, 'Track 1', 23423243, 8000, 45000000, 345345, 0);
