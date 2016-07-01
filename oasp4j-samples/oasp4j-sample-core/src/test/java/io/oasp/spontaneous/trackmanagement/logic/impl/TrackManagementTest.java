@@ -24,7 +24,7 @@ public class TrackManagementTest extends AbstractSpringIntegrationTest {
   private Trackmanagement trackManagement;
 
   /**
-   *
+   * Tests the API-Method findTrack(...) 
    */
   @Test
   public void testTrackmanagement() {
