@@ -95,6 +95,7 @@
         <configuration>
           <!-- Surefire changed the default to the project.build.directory causing trouble with file paths to test resources -->
           <workingDirectory>${basedir}</workingDirectory>
+          <skipTests>true</skipTests>
         </configuration>
       </plugin>
 
